@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ur">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Order Guard</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1F6; --surface:#FFFFFF; --ink:#1B2540; --muted:#5D6782; --line:#D9DEE8;
+  --red:#C8102E; --red-soft:#FCE8EB; --amber:#B97800; --amber-soft:#FFF3D6;
+  --teal:#11767A; --teal-soft:#DDF2F1; --green:#2F8F4E; --green-soft:#E1F3E7; --brand:#24346B;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#0F1528; --surface:#18213A; --ink:#E8ECF5; --muted:#9AA4BF; --line:#2A3556;
+    --red:#FF5C6F; --red-soft:#3A1622; --amber:#F2B640; --amber-soft:#3A2E12;
+    --teal:#4CC6C2; --teal-soft:#123536; --green:#5CCB83; --green-soft:#15331F; --brand:#8FA6FF; color-scheme:dark; }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Manrope,system-ui,-apple-system,"Segoe UI",sans-serif}
+body{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font:700 34px/1 "Barlow Condensed",Manrope,sans-serif;margin:0;color:var(--brand)}
+.sub{color:var(--muted);font-size:13px;margin-top:4px}
+button,.btn{font:700 14px Manrope,sans-serif;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--brand);color:var(--surface);text-decoration:none;display:inline-block}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:focus-visible,.btn:focus-visible,input:focus-visible,.tab:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.test{margin-top:16px;background:var(--amber-soft);color:var(--amber);border-radius:12px;padding:12px 14px;font-weight:700}
+.stores{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:18px}
+.store{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.store b{font:700 20px "Barlow Condensed",sans-serif}
+.chk{display:flex;gap:8px;font-size:13px;margin-top:6px;color:var(--muted)}
+.dot{width:9px;height:9px;border-radius:50%;margin-top:6px;flex:none;background:var(--muted)}
+.dot.ok{background:var(--green)} .dot.bad{background:var(--red)}
+.counts{display:flex;gap:28px;flex-wrap:wrap;margin:22px 2px 6px}
+.count{font-size:13px;color:var(--muted)}
+.count strong{display:block;font:700 40px/1 "Barlow Condensed",sans-serif;color:var(--ink)}
+.count.alarm strong{color:var(--red)}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:18px}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;overflow-x:auto}
+.tab{border:0;background:transparent;color:var(--muted);padding:8px 12px;border-radius:8px;font-weight:700;white-space:nowrap}
+.tab[aria-selected=true]{background:var(--ink);color:var(--surface)}
+input,select{font:500 14px Manrope,sans-serif;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+input{flex:1;min-width:180px}
+.list{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.ev{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--muted);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr auto;gap:4px 16px;align-items:start}
+.ev.critical{border-left-color:var(--red)} .ev.warn{border-left-color:var(--amber)}
+.ev.CANCELLED{border-left-color:var(--green)} .ev.NOTE{border-left-color:var(--teal)}
+.ev.done{opacity:.55}
+.ord{font:700 26px/1 "Barlow Condensed",sans-serif;letter-spacing:.3px}
+.ord a{color:inherit;text-decoration:none;border-bottom:2px solid var(--line)}
+.meta{font-size:12px;color:var(--muted);margin-top:4px}
+.kind{font-weight:700;font-size:13px}
+.critical .kind{color:var(--red)} .warn .kind{color:var(--amber)} .CANCELLED .kind{color:var(--green)} .NOTE .kind{color:var(--teal)}
+.reason{font-size:14px;margin-top:2px;overflow-wrap:anywhere}
+.trk{font-size:13px;margin-top:4px}
+.right{text-align:right;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.right button{padding:6px 10px;font-size:12px}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:26px;text-align:center;color:var(--muted)}
+@media (max-width:640px){ .ev{grid-template-columns:1fr} .right{flex-direction:row;align-items:center;justify-content:space-between;text-align:left} h1{font-size:30px} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Order Guard</h1>
+      <div class="sub" id="sub">Load ho raha hai…</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <a class="btn ghost" id="csv" href="/api/events.csv">CSV download</a>
+      <button id="run">Abhi check karein</button>
+    </div>
+  </header>
+  <div class="test" id="test" hidden>Test mode on hai: duplicates sirf list ho rahe hain, cancel nahi. Sab theek lage to Render mein DRY_RUN=false kar dein.</div>
+  <div class="stores" id="stores"></div>
+  <div class="counts" id="counts"></div>
+  <div class="bar">
+    <div class="tabs" role="tablist" id="tabs">
+      <button class="tab" role="tab" data-tab="action" aria-selected="true">Action chahiye</button>
+      <button class="tab" role="tab" data-tab="cancelled" aria-selected="false">Cancelled</button>
+      <button class="tab" role="tab" data-tab="notes" aria-selected="false">Dono stores</button>
+      <button class="tab" role="tab" data-tab="all" aria-selected="false">Poora log</button>
+    </div>
+    <select id="store" aria-label="Store"><option value="">Dono stores</option></select>
+    <input id="q" type="search" placeholder="Order #, tracking ya phone se dhoondein">
+  </div>
+  <div class="list" id="list"></div>
+</div>
+<script>
+const KIND = {
+  ACTION_NEEDED:'Cancel fail hua, hold par hai',
+  DUP_SHIPMENT:'Ek order 2 baar book',
+  SHIPPED_CANCELLED:'Cancelled order ka parcel booked',
+  DUP_SHIPMENT_PHONE:'Same customer ke 2 parcels',
+  CANCELLED:'Auto-cancel ho gaya',
+  WOULD_CANCEL:'Test mode: cancel hota',
+  NOTE:'Doosre store par bhi customer'
+};
+let tab='action';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const when=t=>new Date(t).toLocaleString('en-PK',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
+
+async function summary(){
+  const r=await fetch('/api/summary'); const s=await r.json();
+  $('#test').hidden=!s.dryRun;
+  $('#sub').textContent=`Duplicate rule: same phone ${s.rules.dupDays} din, same IP ${s.rules.ipDays} din. Aakhri check: ${s.lastSweep?when(s.lastSweep):'abhi nahi'}`;
+  const sel=$('#store'); if(sel.options.length===1) s.stores.forEach(x=>sel.add(new Option(x.label,x.key)));
+  const line=(name,v)=>`<div class="chk"><span class="dot ${v?(v.ok?'ok':'bad'):''}"></span><span><b style="font:700 13px Manrope">${name}:</b> ${esc(v?v.msg:'abhi check nahi hua')}</span></div>`;
+  $('#stores').innerHTML=s.stores.map(x=>`<div class="store"><b>${esc(x.label)}</b>${line('Shopify',x.shopify)}${line('Webhook',x.webhook)}${line('Instaworld',x.instaworld)}${line('Guard',x.guard)}</div>`).join('');
+  const c=s.counts;
+  $('#counts').innerHTML=`<div class="count ${+c.action?'alarm':''}"><strong>${c.action}</strong>action chahiye</div>
+    <div class="count"><strong>${c.cancelled_today}</strong>aaj cancel</div>
+    <div class="count"><strong>${c.cancelled_30d}</strong>30 din mein cancel</div>
+    <div class="count"><strong>${c.notes_30d}</strong>dono stores wale customer</div>`;
+}
+
+async function list(){
+  const p=new URLSearchParams({tab, store:$('#store').value, q:$('#q').value.trim()});
+  $('#csv').href='/api/events.csv?'+p;
+  const r=await fetch('/api/events?'+p); const rows=await r.json();
+  if(!rows.length){ $('#list').innerHTML=`<div class="empty">${tab==='action'?'Koi masla nahi. Jab bhi koi duplicate ya issue aayega, order number ke saath yahan dikhega.':'Is list mein abhi kuch nahi.'}</div>`; return; }
+  $('#list').innerHTML=rows.map(e=>`
+    <div class="ev ${e.severity} ${e.type} ${e.resolved?'done':''}">
+      <div class="ord">${e.link?`<a href="${e.link}" target="_blank" rel="noopener">${esc(e.order_ref)}</a>`:esc(e.order_ref)}</div>
+      <div>
+        <div class="kind">${esc(KIND[e.type]||e.type)}</div>
+        <div class="reason">${esc(e.reason)}</div>
+        ${e.tracking?`<div class="trk">Tracking: <b>${esc(e.tracking)}</b></div>`:''}
+        <div class="meta">${esc(e.store_label)}${e.phone?' • '+esc(e.phone):''} • ${when(e.at)}</div>
+      </div>
+      <div class="right">${e.severity==='critical'&&!e.resolved?`<button data-id="${e.id}">Ho gaya</button>`:''}${e.resolved?'<span class="meta">Resolved</span>':''}</div>
+    </div>`).join('');
+}
+
+async function refresh(){ try{ await Promise.all([summary(),list()]); }catch(e){ $('#sub').textContent='Server se rabta nahi ho raha. Page dobara kholein.'; } }
+
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('.tab'); if(!b) return; tab=b.dataset.tab;
+  document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',t===b)); list();});
+$('#store').addEventListener('change',list);
+let tmr; $('#q').addEventListener('input',()=>{clearTimeout(tmr); tmr=setTimeout(list,300);});
+$('#list').addEventListener('click',async e=>{const b=e.target.closest('button[data-id]'); if(!b) return;
+  b.disabled=true; await fetch(`/api/events/${b.dataset.id}/resolve`,{method:'POST'}); refresh();});
+$('#run').addEventListener('click',async()=>{const b=$('#run'); b.disabled=true; b.textContent='Check ho raha hai…';
+  await fetch('/api/run',{method:'POST'}); setTimeout(async()=>{await refresh(); b.disabled=false; b.textContent='Abhi check karein';},8000);});
+refresh(); setInterval(refresh,60000);
+</script>
+</body>
+</html>
